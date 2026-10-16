@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0 — 2026-10-16
+
+- Add an original processor/Z icon with vector source, PNG, and seven Windows ICO sizes; embed it in the executable and window title bar.
+- Redesign the dark desktop interface with a mint accent, compact 4-by-2 core cards, separate power budget, and clearer profile actions.
+- Keep advanced standalone logon controls in an expandable section.
+- Add a startup read-completion notification and distinct information, success, warning, and error toasts.
+- Avoid notification focus stealing; size messages to content, pause dismissal on hover, and replace previous editor notifications.
+- Add a no-write notification preview button and profile-save/startup-enrollment feedback.
+- Document the maintainer's user-reported stable 5700X3D settings, with a reference JSON that disables auto-apply.
+- Add notification layout/focus and minimum-window-size checks to the hardware-free UI tests.
+
 ## 0.3.0 — 2026-10-16
 
 - Read all eight Curve Optimizer offsets and current PPT/TDC/EDC limits when the app opens on Windows, before optional automatic application.
@@ -27,3 +38,4 @@ Validation: Release build, smoke tests, and headless UI tests pass on Windows. A
 ## 0.1.0
 
 - Initial cross-platform profile editor and command preview.
+

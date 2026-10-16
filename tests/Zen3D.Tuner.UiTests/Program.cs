@@ -15,7 +15,7 @@ try
     var window = new MainWindow(store);
     window.Show();
     Dispatcher.UIThread.RunJobs();
-    if (args.Length == 1)
+    if (args.Length >= 1)
     {
         AvaloniaHeadlessPlatform.ForceRenderTimerTick();
         using var frame = window.CaptureRenderedFrame() ?? throw new Exception("No rendered UI frame");
@@ -58,6 +58,27 @@ try
     {
         Check(!Control<Button>("ApplyButton").IsEnabled, "macOS cannot apply hardware settings");
         Check(!Control<Button>("EnableApplyStartupButton").IsEnabled, "macOS cannot enroll startup");
+    }
+    var toast = new ToastWindow("CPU offsets and power limits are ready. No profile was applied.", "Current settings loaded", NoticeKind.Information);
+    toast.Show(window);
+    Dispatcher.UIThread.RunJobs();
+    Check(!toast.ShowActivated && !toast.ShowInTaskbar, "Notifications must not steal focus or clutter the taskbar");
+    Check(toast.Bounds.Width == 420 && toast.Bounds.Height > 100, "Toast content must determine its height");
+    if (args.Length >= 2)
+    {
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        using var toastFrame = toast.CaptureRenderedFrame() ?? throw new Exception("No notification frame");
+        toastFrame.Save(args[1], new Avalonia.Media.Imaging.PngBitmapEncoderOptions());
+    }
+    toast.Close();
+    window.Width = 1000; window.Height = 720;
+    Dispatcher.UIThread.RunJobs();
+    Check(Control<Panel>("CorePanel").Children.All(c => c.Bounds.Width > 80), "Core cards must remain usable at the minimum window size");
+    if (args.Length >= 3)
+    {
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        using var compactFrame = window.CaptureRenderedFrame() ?? throw new Exception("No compact frame");
+        compactFrame.Save(args[2], new Avalonia.Media.Imaging.PngBitmapEncoderOptions());
     }
     window.Close();
     Console.WriteLine("All headless UI tests passed; no hardware or user profile modified.");

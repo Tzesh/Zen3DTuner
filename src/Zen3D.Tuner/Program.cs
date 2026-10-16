@@ -7,6 +7,7 @@ namespace Zen3D.Tuner;
 internal static class Program
 {
     internal static string? NotificationMessage { get; private set; }
+    internal static bool NotificationFailed { get; private set; }
     [STAThread]
     public static int Main(string[] args)
     {
@@ -73,7 +74,7 @@ internal static class Program
                 try { AppendLog(logPath, message); }
                 catch (Exception logError) { Console.Error.WriteLine("Could not write result log: " + logError.Message); }
             }
-            if (notify) ShowNotification("Automatic profile application failed. Check the activity log. " + ex.Message);
+            if (notify) ShowNotification("Automatic profile application failed. Check the activity log. " + ex.Message, failed: true);
             return 1;
         }
     }
@@ -81,9 +82,10 @@ internal static class Program
     private static void AppendLog(string path, string message) =>
         File.AppendAllText(path, $"{DateTimeOffset.Now:O} {message.Replace('\r', ' ').Replace('\n', ' ')}{Environment.NewLine}");
 
-    private static void ShowNotification(string message)
+    private static void ShowNotification(string message, bool failed = false)
     {
         NotificationMessage = message;
+        NotificationFailed = failed;
         try { BuildAvaloniaApp().StartWithClassicDesktopLifetime([]); }
         catch (Exception ex) { Console.Error.WriteLine("Notification unavailable: " + ex.Message); }
     }

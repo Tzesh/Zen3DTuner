@@ -4,9 +4,11 @@
     <AssemblyName>Zen3D.Tuner</AssemblyName>
     <RootNamespace>Zen3D.Tuner</RootNamespace>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
+    <ApplicationIcon>Assets/zen3d.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <AvaloniaResource Include="Assets/**" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.4" />
@@ -14,4 +16,5 @@
     <ProjectReference Include="../Zen3D.Hardware/Zen3D.Hardware.csproj" />
   </ItemGroup>
 </Project>
+
 

@@ -1,5 +1,7 @@
 # Zen3D Tuner
 
+<img src="docs/images/icon.png" alt="Zen3D Tuner icon" width="80" />
+
 **A focused, open-source Curve Optimizer and power-limit tuner for AMD Ryzen 7 5700X3D and 5800X3D.**
 
 [Download the Windows release](https://github.com/Tzesh/Zen3DTuner/releases) · [Changelog](CHANGELOG.md) · [Windows guide](docs/WINDOWS-TESTING.md) · [Contributing](CONTRIBUTING.md)
@@ -31,9 +33,45 @@ Blank power fields leave existing limits unchanged. They do not restore defaults
 
 **Current readings are not factory defaults.** BIOS settings or another utility may have already changed them. Refresh to read the firmware again; use **Use current values in editor** to explicitly replace the editor contents. Complete readings outside supported write ranges or with fractional limits are displayed but not silently clamped or imported.
 
+## A real-world 5700X3D example
+
+The maintainer reports the following profile as stable on their own Ryzen 7 5700X3D. Firmware readback on that machine matched these settings. The workload coverage and test duration have not been documented; this is a **user-reported example**, not an independently certified or universally stable preset.
+
+| Core | CO offset |
+| --- | ---: |
+| 0 | -15 |
+| 1 | -15 |
+| 2 | -25 |
+| 3 | -25 |
+| 4 | -25 |
+| 5 | -25 |
+| 6 | -25 |
+| 7 | -26 |
+
+| PPT | TDC | EDC |
+| ---: | ---: | ---: |
+| 100 W | 70 A | 100 A |
+
+The [example JSON](examples/tzesh-5700x3d.json) includes these settings with **automatic application disabled**. It is never loaded or applied automatically. Individual CPUs can require different offsets, including among processors with the same model name. Test your own settings before enabling automatic application.
+
+## Desktop notifications
+
+The branded desktop toasts distinguish information, success, warnings, and failures:
+
+- **Current settings loaded** after a complete startup read, when no automatic apply is selected. Partial reads and failures have their own messages.
+- **Profile applied** after firmware acknowledges application; readback and stability remain separate results.
+- **Profile saved** after local persistence, and feedback when scheduled logon application is enabled or disabled.
+- A matching toast after the standalone logon helper finishes, without opening the editor.
+
+Toasts do not activate their window or take keyboard focus. They dismiss after 7 seconds (12 for warnings/errors), pause while hovered, and have a close button. In the editor, a new toast replaces the previous one. Use **Preview desktop notification** to try the appearance without saving or applying settings.
+
+These are Avalonia-rendered desktop toasts, not browser Toastr or Windows Action Center notifications. Details remain in Activity and, for hardware operations, the protected log.
+
+![Desktop notification preview](docs/images/notification.png)
+
 ## Get started on Windows
 
-1. Download and extract `Zen3DTuner-v0.3.0-win-x64.zip` from [Releases](https://github.com/Tzesh/Zen3DTuner/releases). Keep the full extracted folder together.
+1. Download and extract `Zen3DTuner-v0.4.0-win-x64.zip` from [Releases](https://github.com/Tzesh/Zen3DTuner/releases). Keep the full extracted folder together.
 2. Install [PawnIO](https://github.com/namazso/PawnIO) separately using its official installer. No driver installer is bundled or automatically executed.
 3. Run `Zen3D.Tuner.exe`. The release includes the .NET runtime. Allow the read-only helper's Windows administrator prompt to load current settings.
 4. Review current CO and power limits. Edit your requested settings, give the profile a name, and choose **Save profile**.
@@ -44,11 +82,13 @@ Requires Windows x64, a supported eight-core CPU, PawnIO, and a Windows administ
 
 The binaries are unsigned. The app does not disable Windows security features or install legacy InpOut/WinRing0 drivers.
 
+To update an existing Program Files installation, close the app and run `.\Update-Windows.ps1 -BuildDirectory .` from the newly extracted release in an administrator PowerShell. The updater keeps the old installation as a backup and preserves your profile and scheduled-task state.
+
 ## Automatic application
 
 **When the app opens:** select **Apply saved profile when app opens**, enable hardware writes, confirm that you tested these exact settings, then **Save profile**. Future launches read current settings first and then apply the saved profile, requesting UAC as necessary. Uncheck the option and save to disable it. **Launch GUI at Windows login** can launch this same flow at login.
 
-**At Windows logon without the editor:** install the release into the protected Program Files location using the supplied script, then choose **Save stable snapshot + enable at logon** after testing and confirming the settings. The task runs once after a 30-second delay and shows a toast. Editing your normal profile does not update this snapshot; enroll again to replace it. **Disable automatic application** removes this logon task. It does not change the separate app-open checkbox.
+**At Windows logon without the editor:** install the release into the protected Program Files location using the supplied script, then choose **Save snapshot + enable at logon** after testing and confirming the settings. The task runs once after a 30-second delay and shows a toast. Editing your normal profile does not update this snapshot; enroll again to replace it. **Disable logon application** removes this logon task. It does not change the separate app-open checkbox.
 
 Choose one automatic mode to avoid duplicate application. Neither mode is enabled by downloading, building, or installing the app. There is no wake/resume reapplication, automatic stress test, automatic retry after a failed apply, or rollback of partial writes.
 
@@ -113,3 +153,6 @@ For installation, disabling startup, and recovery, read the [Windows guide](docs
 ## License and acknowledgements
 
 Original Zen3D Tuner code is licensed under **GPL-3.0-or-later**; see [LICENSE](LICENSE). ZenStates-Core retains its own GPL-3.0 terms and notices. The vendored source and [local change record](third_party/ZenStates-Core/ZEN3D-CHANGES.md) are included. PawnIO is installed separately. This project is independent and is not affiliated with or endorsed by AMD.
+
+
+

@@ -19,6 +19,7 @@ public partial class MainWindow : Window
     private HardwareSnapshot? _snapshot;
     private readonly bool _startupOperations;
     private bool _busy;
+    private ToastWindow? _toast;
 
     public MainWindow() : this(new ProfileStore(), true) { }
 
@@ -68,7 +69,12 @@ public partial class MainWindow : Window
             bool apply = _profile.ApplyOnLaunch;
             await RunElevated("--read-current");
             if (apply) await RunElevated("--apply-profile");
+            else if (_snapshot is not null)
+                Notify(_snapshot.Complete ? "Current settings loaded" : "Some readings unavailable",
+                    _snapshot.Complete ? "CPU offsets and power limits are ready. No profile was applied." : "Available firmware values are shown. Check Activity for missing readings.",
+                    _snapshot.Complete ? NoticeKind.Information : NoticeKind.Warning);
         };
+        Closed += (_, _) => _toast?.Close();
     }
 
     private void PopulateProfile()
@@ -87,13 +93,13 @@ public partial class MainWindow : Window
                 Text = _profile.Offsets[core].ToString(),
                 FontWeight = FontWeight.Bold,
                 Foreground = Brush.Parse("#55D5B2"),
-                FontSize = 14
+                FontSize = 26
             };
             var heading = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
             heading.Children.Add(new TextBlock
             {
                 Text = $"CORE {core}", FontWeight = FontWeight.SemiBold,
-                FontSize = 12, Foreground = Brush.Parse("#CFD7E8")
+                FontSize = 10, Foreground = Brush.Parse("#93A8BC"), VerticalAlignment = VerticalAlignment.Center
             });
             Grid.SetColumn(val, 1);
             heading.Children.Add(val);
@@ -103,7 +109,8 @@ public partial class MainWindow : Window
                 Minimum = -30, Maximum = 0,
                 Value = _profile.Offsets[core],
                 TickFrequency = 1, IsSnapToTickEnabled = true,
-                Width = 185, HorizontalAlignment = HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                MinWidth = 0, Height = 40, MinHeight = 40, Padding = new Thickness(0)
             };
             slider.PropertyChanged += (_, args) =>
             {
@@ -113,19 +120,18 @@ public partial class MainWindow : Window
                 StableProfileCheck.IsChecked = false;
                 val.Text = offset.ToString();
             };
-            var stack = new StackPanel { Spacing = 8 };
+            var stack = new StackPanel { Spacing = 5 };
             stack.Children.Add(heading);
             stack.Children.Add(slider);
             var reading = _snapshot?.Cores.FirstOrDefault(c => c.Core == core);
-            stack.Children.Add(new TextBlock { Text = "Current: " + (reading?.Value?.ToString() ?? "unavailable"),
-                Foreground = Brush.Parse("#9BA9C3"), FontSize = 12 });
+            stack.Children.Add(new TextBlock { Text = "CURRENT  " + (reading?.Value?.ToString() ?? "—"),
+                Foreground = Brush.Parse("#9BA9C3"), FontSize = 10 });
             CorePanel.Children.Add(new Border
             {
-                Width = 235,
                 CornerRadius = new CornerRadius(12),
-                Background = Brush.Parse("#253044"),
+                Background = Brush.Parse("#1B2B3B"),
                 Padding = new Thickness(12),
-                Margin = new Thickness(0, 0, 10, 10),
+                Margin = new Thickness(0, 0, 8, 8),
                 Child = stack
             });
         }
@@ -140,6 +146,7 @@ public partial class MainWindow : Window
                 throw new InvalidOperationException("Enable hardware writes and confirm these exact settings before saving automatic application.");
             _store.Save(_profile);
             StatusText.Text = "Saved locally. No offsets were applied to the CPU.";
+            if (_startupOperations) Notify("Profile saved", $"'{_profile.Name}' is saved locally. CPU settings were not changed.", NoticeKind.Success);
         }
         catch (Exception ex) { StatusText.Text = "Save failed: " + ex.Message; }
     }
@@ -220,6 +227,16 @@ public partial class MainWindow : Window
     private async void DisableApplyStartup_Click(object? sender, RoutedEventArgs e) => await RunElevated("--startup-disable");
 
     private async void ReadCurrent_Click(object? sender, RoutedEventArgs e) => await RunElevated("--read-current");
+
+    private void Notify(string title, string message, NoticeKind kind)
+    {
+        _toast?.Close();
+        _toast = new ToastWindow(message, title, kind);
+        _toast.Show(this);
+    }
+
+    private void TestNotification_Click(object? sender, RoutedEventArgs e) =>
+        Notify("You're all set", "This is a notification preview. No settings were saved or applied.", NoticeKind.Information);
 
     private void UseCurrent_Click(object? sender, RoutedEventArgs e)
     {
@@ -322,15 +339,24 @@ public partial class MainWindow : Window
                     ReadbackText.Text = "Post-apply readback unavailable. Refresh current values to retry.";
                 }
                 PopulateProfile();
-                new ToastWindow(process.ExitCode == 0 ? $"Profile '{_profile.Name}' applied. SMU commands acknowledged." : "Profile application failed. Some settings may have changed; check Activity.").Show(this);
+                Notify(process.ExitCode == 0 ? "Profile applied" : "Application failed",
+                    process.ExitCode == 0 ? $"'{_profile.Name}' • SMU commands acknowledged. Readback is shown separately; stability is not verified." : "Some settings may have changed. Check Activity before retrying.",
+                    process.ExitCode == 0 ? NoticeKind.Success : NoticeKind.Error);
             }
-            if (process.ExitCode == 0 && action == "--startup-enable") StableProfileCheck.IsChecked = false;
+            if (process.ExitCode == 0 && action == "--startup-enable")
+            {
+                StableProfileCheck.IsChecked = false;
+                Notify("Logon application enabled", "Your tested snapshot will apply 30 seconds after your next Windows logon.", NoticeKind.Success);
+            }
+            if (process.ExitCode == 0 && action == "--startup-disable")
+                Notify("Logon application disabled", "The scheduled task was removed. App-open preferences and current CPU settings are unchanged.", NoticeKind.Information);
+            if (process.ExitCode != 0 && !applying) Notify("Operation failed", "Check Activity for the helper result.", NoticeKind.Error);
         }
         catch (Exception ex)
         {
             StatusText.Text = "Operation failed or was cancelled: " + ex.Message;
             if (applying) SetHardwareStatus("APPLY INCOMPLETE / CHECK LOG", "#F0A0A0");
-            if (applying) new ToastWindow("Profile application failed or was cancelled. " + ex.Message).Show(this);
+            Notify(applying ? "Application not completed" : reading ? "Readback unavailable" : "Operation not completed", ex.Message, NoticeKind.Warning);
             if (reading) { ReadbackText.Text = "Readback unavailable: " + ex.Message; CurrentPowerText.Text = "Current power limits: unavailable"; }
         }
         finally
@@ -366,4 +392,5 @@ public partial class MainWindow : Window
         }
     }
 }
+
 
