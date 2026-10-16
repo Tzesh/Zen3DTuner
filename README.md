@@ -37,7 +37,7 @@ Blank power fields leave existing limits unchanged. They do not restore defaults
 
 The maintainer reports the following profile as stable on their own Ryzen 7 5700X3D. Firmware readback on that machine matched these settings. The workload coverage and test duration have not been documented; this is a **user-reported example**, not an independently certified or universally stable preset.
 
-Core numbering matches the app and starts at 0. **Core 6 is -25; Core 7 is -26.**
+Core numbering matches the app and starts at 0. **Core 6 and Core 7 are both -25.**
 
 | Core | CO offset |
 | --- | ---: |
@@ -48,7 +48,7 @@ Core numbering matches the app and starts at 0. **Core 6 is -25; Core 7 is -26.*
 | 4 | -25 |
 | 5 | -25 |
 | 6 | -25 |
-| 7 | -26 |
+| 7 | -25 |
 
 | PPT | TDC | EDC |
 | ---: | ---: | ---: |
