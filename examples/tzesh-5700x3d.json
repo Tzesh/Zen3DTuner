@@ -1,7 +1,16 @@
 {
   "SchemaVersion": 1,
   "Name": "Tzesh 5700X3D example",
-  "Offsets": [-15, -15, -25, -25, -25, -25, -25, -26],
+  "Offsets": [
+    -15,
+    -15,
+    -25,
+    -25,
+    -25,
+    -25,
+    -25,
+    -25
+  ],
   "PptWatts": 100,
   "TdcAmps": 70,
   "EdcAmps": 100,
