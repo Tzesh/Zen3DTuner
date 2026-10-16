@@ -1,0 +1,106 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Zen3D.Tuner.MainWindow"
+        Title="Zen3D Tuner — v0.3.0"
+        Width="1090" Height="760" MinWidth="810" MinHeight="600"
+        Background="#10141E">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="28">
+    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,20">
+      <StackPanel Spacing="5">
+        <TextBlock Text="ZEN3D" FontSize="14" FontWeight="Bold" Foreground="#55D5B2" />
+        <TextBlock Text="Curve Optimizer" FontSize="32" FontWeight="Bold" Foreground="White" />
+        <TextBlock Text="Precision, without the clutter." FontSize="13" Foreground="#9BA9C3" />
+      </StackPanel>
+      <Border Grid.Column="1" Background="#24323C" CornerRadius="15" Padding="14,8" VerticalAlignment="Top">
+        <TextBlock x:Name="HardwareStatusText" Text="NO APPLY THIS SESSION" Foreground="#78D8B5" FontWeight="SemiBold" FontSize="12" />
+      </Border>
+    </Grid>
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" BringIntoViewOnFocusChange="False">
+      <Grid x:Name="EditorPanel" ColumnDefinitions="1.6*,1*" ColumnSpacing="18">
+        <StackPanel Grid.Column="0" Spacing="18">
+          <Border CornerRadius="16" Background="#192132" Padding="20">
+            <StackPanel Spacing="8">
+              <TextBlock Text="TARGET PROCESSOR" FontSize="11" Foreground="#83A5B4" FontWeight="Bold" />
+              <TextBlock x:Name="CpuNameText" Text="Detecting..." FontSize="20" FontWeight="Bold" Foreground="White" TextWrapping="Wrap" />
+              <TextBlock Text="Zen 3 • Ryzen 7 5700X3D / 5800X3D • 8 physical cores" Foreground="#9BA9C3" FontSize="12" />
+            </StackPanel>
+          </Border>
+          <Border CornerRadius="16" Background="#192132" Padding="20">
+            <StackPanel Spacing="12">
+              <TextBlock Text="Power and current limits" FontSize="19" FontWeight="Bold" Foreground="White" />
+              <TextBlock x:Name="CurrentPowerText" Text="Current power limits: not read yet" TextWrapping="Wrap" Foreground="#55D5B2" FontSize="12" />
+              <TextBlock Text="Blank = keep the existing limit. PPT is watts; TDC and EDC are amps." TextWrapping="Wrap" FontSize="12" Foreground="#9BA9C3" />
+              <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <StackPanel Spacing="6">
+                  <TextBlock Text="PPT (W)" Foreground="#CFD7E8" />
+                  <NumericUpDown x:Name="PptBox" Minimum="1" Maximum="142" Increment="1" FormatString="0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="6">
+                  <TextBlock Text="TDC (A)" Foreground="#CFD7E8" />
+                  <NumericUpDown x:Name="TdcBox" Minimum="1" Maximum="95" Increment="1" FormatString="0" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="6">
+                  <TextBlock Text="EDC (A)" Foreground="#CFD7E8" />
+                  <NumericUpDown x:Name="EdcBox" Minimum="1" Maximum="140" Increment="1" FormatString="0" />
+                </StackPanel>
+              </Grid>
+              <Button Content="Leave power limits unchanged" Click="ClearPower_Click" />
+              <TextBlock Text="Input caps: 142 W / 95 A / 140 A. These are not a guarantee of stability." TextWrapping="Wrap" FontSize="11" Foreground="#9BA9C3" />
+            </StackPanel>
+          </Border>
+          <Border CornerRadius="16" Background="#192132" Padding="20">
+            <StackPanel Spacing="14">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Core offsets" FontSize="19" FontWeight="Bold" Foreground="White" />
+                  <TextBlock Text="-30 to 0 Curve Optimizer steps (NOT millivolts)." FontSize="12" Foreground="#9BA9C3" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="PER-CORE" Foreground="#55D5B2" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" />
+              </Grid>
+              <WrapPanel x:Name="CorePanel" Orientation="Horizontal" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="18">
+          <Border CornerRadius="16" Background="#192132" Padding="20">
+            <StackPanel Spacing="14">
+              <TextBlock Text="Profile" FontSize="19" FontWeight="Bold" Foreground="White" />
+              <TextBlock Text="PROFILE NAME" FontSize="11" Foreground="#9BA9C3" />
+              <TextBox x:Name="ProfileNameBox" PlaceholderText="Balanced" MaxLength="64" />
+              <Button x:Name="ReadCurrentButton" Click="ReadCurrent_Click" Content="Refresh current CPU settings" HorizontalAlignment="Stretch" />
+              <Button x:Name="UseCurrentButton" Click="UseCurrent_Click" Content="Use current values in editor" HorizontalAlignment="Stretch" />
+              <Button x:Name="SaveButton" Click="Save_Click" Content="Save profile" HorizontalAlignment="Stretch" />
+              <Button x:Name="ResetButton" Click="Reset_Click" Content="Reset offsets to 0" HorizontalAlignment="Stretch" />
+              <Button x:Name="PreviewButton" Click="Preview_Click" Content="Preview commands (dry run)" HorizontalAlignment="Stretch" />
+              <CheckBox x:Name="ExperimentalCheck" Content="Enable experimental hardware writes" />
+              <Button x:Name="ApplyButton" Click="Apply_Click" Content="Apply now (Windows / admin)" HorizontalAlignment="Stretch" />
+            </StackPanel>
+          </Border>
+          <Border CornerRadius="16" Background="#192132" Padding="20">
+            <StackPanel Spacing="12">
+              <TextBlock Text="Startup" FontSize="19" FontWeight="Bold" Foreground="White" />
+              <CheckBox x:Name="ApplyOnLaunchCheck" Content="Apply saved profile when app opens" />
+              <CheckBox x:Name="AutostartCheck" IsCheckedChanged="Autostart_Changed"
+                        Content="Launch GUI at Windows login" />
+              <TextBlock Text="Save profile to persist the app-open option. Logon application below uses a separate snapshot. Use one automatic mode to avoid applying twice." TextWrapping="Wrap" FontSize="12" Foreground="#9BA9C3" />
+              <CheckBox x:Name="StableProfileCheck"><TextBlock Text="I have tested these exact settings and approve automatic application." TextWrapping="Wrap" /></CheckBox>
+              <Button x:Name="EnableApplyStartupButton" Click="EnableApplyStartup_Click" Content="Save stable snapshot + enable at logon" HorizontalAlignment="Stretch" />
+              <Button x:Name="DisableApplyStartupButton" Click="DisableApplyStartup_Click" Content="Disable automatic application" HorizontalAlignment="Stretch" />
+              <TextBlock Text="Windows only. Uses a separate stable snapshot, runs without the GUI 30 seconds after logon, and requires an admin-protected installation. Editing your profile does not update the startup snapshot." TextWrapping="Wrap" FontSize="12" Foreground="#9BA9C3" />
+            </StackPanel>
+          </Border>
+
+        </StackPanel>
+      </Grid>
+    </ScrollViewer>
+          <Border Grid.Row="2" Margin="0,16,0,0" CornerRadius="16" Background="#142E2B" BorderBrush="#27584A" BorderThickness="1" Padding="16">
+            <StackPanel Spacing="9">
+              <TextBlock x:Name="ReadbackText" Text="Current values have not been read yet." TextWrapping="Wrap" Foreground="#9BA9C3" FontSize="12" />
+              <TextBlock Text="ACTIVITY" FontSize="11" Foreground="#55D5B2" FontWeight="Bold" />
+              <ScrollViewer MaxHeight="90" VerticalScrollBarVisibility="Auto"><TextBlock x:Name="StatusText" Foreground="#DDE7F4" FontSize="13" TextWrapping="Wrap" /></ScrollViewer>
+              <TextBlock Text="Current readings are firmware-reported values, not factory defaults or proof of stability." Foreground="#87AA9E" FontSize="11" />
+            </StackPanel>
+          </Border>
+  </Grid>
+</Window>
+

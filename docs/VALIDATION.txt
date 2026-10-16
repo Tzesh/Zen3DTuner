@@ -1,0 +1,10 @@
+Zen3D Tuner v0.3.0 — validation, 2026-10-16
+
+PASS: Windows Release build.
+PASS: hardware-free core smoke tests, including signed CO decoding, unknown/truncated PM tables, invalid telemetry, profile cloning, CLI parsing, and snapshot separation.
+PASS: headless Avalonia UI tests, including saved auto-apply confirmation and disabling auto-apply.
+PASS: read-only elevated helper on Ryzen 7 5700X3D. Eight CO offsets: -5. PPT/TDC/EDC: 125 W / 95 A / 120 A. PM table: 0x380905. No tuning writes issued by this validation.
+PASS: headless UI screenshot inspected.
+
+NOT VERIFIED: reboot/logon task execution, 5800X3D hardware, long-term stability, independently measured voltage changes.
+The preexisting vendored ACPI code emits three CS9125 warnings on a clean build.

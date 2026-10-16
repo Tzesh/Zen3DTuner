@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Zen3D.Core/Zen3D.Core.csproj" />
+    <ProjectReference Include="../../third_party/ZenStates-Core/ZenStates-Core.csproj" />
+  </ItemGroup>
+</Project>

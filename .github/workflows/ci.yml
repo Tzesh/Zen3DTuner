@@ -1,0 +1,23 @@
+name: CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Run core smoke tests
+        run: dotnet run --project tests/Zen3D.Tuner.SmokeTests/Zen3D.Tuner.SmokeTests.csproj -c Release
+      - name: Run headless UI tests
+        run: dotnet run --project tests/Zen3D.Tuner.UiTests/Zen3D.Tuner.UiTests.csproj -c Release
+      - name: Build desktop app
+        run: dotnet build src/Zen3D.Tuner/Zen3D.Tuner.csproj -c Release

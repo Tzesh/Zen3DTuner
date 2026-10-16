@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.vs/
+.idea/
+.DS_Store
+*.user
+*.suo
+out/
+artifacts/
+TestResults/
+
+diagnose-*.txt
+readback-*.txt
+*.log
+request-*.json

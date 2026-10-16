@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>ZenStates.Core</RootNamespace>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Version>1.91.0</Version>
+    <NoWarn>$(NoWarn);CA1416;CS0649;CS0169</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="10.0.13" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.13" />
+    <EmbeddedResource Include="Resources/PawnIo/AMDFamily17.bin" />
+    <EmbeddedResource Include="Resources/PawnIo/LpcIO.bin" />
+    <EmbeddedResource Include="Resources/PawnIo/RyzenSMU.bin" />
+    <EmbeddedResource Include="Resources/PawnIo/SmbusPIIX4.bin" />
+    <None Include="LICENSE" CopyToOutputDirectory="PreserveNewest" TargetPath="licenses/ZenStates-Core-LICENSE.txt" />
+  </ItemGroup>
+</Project>
